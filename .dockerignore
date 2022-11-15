@@ -1,0 +1,14 @@
+# ignore all docker related files
+Dockerfile
+Dockerfile.production
+docker-compose.yml
+
+# ignore build scripts
+./scipts
+./build
+
+# ignore images in container, but not the actual folder
+./uploads/*
+
+# ignore testing dump files if existing
+./dump
