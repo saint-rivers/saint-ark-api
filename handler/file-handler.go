@@ -14,6 +14,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+// HealthCheck godoc
+// @Summary Get all images from the server.
+// @Tags root
+// @Accept */*
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Router /api/v1/images [get]
 func GetListedImages(ctx *fiber.Ctx, client *mongo.Client) error {
 	collection := getResourceCollection(client)
 
@@ -48,6 +55,14 @@ func GetListedImages(ctx *fiber.Ctx, client *mongo.Client) error {
 	})
 }
 
+// HealthCheck godoc
+// @Summary Show the status of server.
+// @Description get the status of server.
+// @Tags root
+// @Accept */*
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Router /api/v1/images [post]
 func InsertImage(ctx *fiber.Ctx, client *mongo.Client) error {
 	collection := getResourceCollection(client)
 	_, fileName, originalFilename, err := utils.SaveFile(ctx)
