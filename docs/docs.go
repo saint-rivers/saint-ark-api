@@ -36,6 +36,14 @@ const docTemplate = `{
                     "image-handler"
                 ],
                 "summary": "Get all images from the server.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "specify file format",
+                        "name": "format",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
