@@ -26,7 +26,6 @@ const docTemplate = `{
     "paths": {
         "/api/v1/images": {
             "get": {
-                "description": "gets all files from the server.",
                 "consumes": [
                     "*/*"
                 ],
@@ -34,9 +33,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "root"
+                    "image-handler"
                 ],
-                "summary": "Show the status of server.",
+                "summary": "Get all images from the server.",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -50,15 +49,23 @@ const docTemplate = `{
             "post": {
                 "description": "get the status of server.",
                 "consumes": [
-                    "*/*"
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "root"
+                    "image-handler"
                 ],
                 "summary": "Show the status of server.",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "single file upload",
+                        "name": "myFile",
+                        "in": "formData"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",

@@ -16,5 +16,7 @@ func ApplyFileRouter(app *fiber.App, client *mongo.Client) *fiber.App {
 		return handler.InsertImage(c, client)
 	})
 
+	app.Static("/f", "./uploads")
+
 	return app
 }

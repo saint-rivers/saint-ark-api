@@ -16,37 +16,37 @@ import (
 
 // HealthCheck godoc
 // @Summary Get all images from the server.
-// @Tags root
+// @Tags image-handler
 // @Accept */*
 // @Produce json
 // @Success 200 {object} map[string]interface{}
 // @Router /api/v1/images [get]
 func GetListedImages(ctx *fiber.Ctx, client *mongo.Client) error {
-	collection := getResourceCollection(client)
+	imageCollection := getResourceCollection(client)
 
 	findOptions := options.Find()
 	findOptions.SetLimit(10)
 
-	curr, err := collection.Find(context.TODO(), bson.D{{}}, findOptions)
+	current, err := imageCollection.Find(context.TODO(), bson.D{{}}, findOptions)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	var results []*model.Resource
 
-	for curr.Next(context.TODO()) {
+	for current.Next(context.TODO()) {
 		var resource model.Resource
-		err := curr.Decode(&resource)
+		err := current.Decode(&resource)
 		if err != nil {
 			log.Fatal(err)
 		}
 		results = append(results, &resource)
 	}
 
-	if err := curr.Err(); err != nil {
+	if err := current.Err(); err != nil {
 		log.Fatal(err)
 	}
-	curr.Close(context.TODO())
+	current.Close(context.TODO())
 
 	fmt.Printf("Found multiple documents (array of pointers): %+v\n", results)
 	return ctx.JSON(fiber.Map{
@@ -58,8 +58,9 @@ func GetListedImages(ctx *fiber.Ctx, client *mongo.Client) error {
 // HealthCheck godoc
 // @Summary Show the status of server.
 // @Description get the status of server.
-// @Tags root
-// @Accept */*
+// @Tags image-handler
+// @Accept 	multipart/form-data
+// @Param myFile formData file false "single file upload"
 // @Produce json
 // @Success 200 {object} map[string]interface{}
 // @Router /api/v1/images [post]

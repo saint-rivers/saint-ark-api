@@ -16,7 +16,6 @@ paths:
     get:
       consumes:
       - '*/*'
-      description: gets all files from the server.
       produces:
       - application/json
       responses:
@@ -25,13 +24,18 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: Show the status of server.
+      summary: Get all images from the server.
       tags:
-      - root
+      - image-handler
     post:
       consumes:
-      - '*/*'
+      - multipart/form-data
       description: get the status of server.
+      parameters:
+      - description: single file upload
+        in: formData
+        name: myFile
+        type: file
       produces:
       - application/json
       responses:
@@ -42,5 +46,5 @@ paths:
             type: object
       summary: Show the status of server.
       tags:
-      - root
+      - image-handler
 swagger: "2.0"
