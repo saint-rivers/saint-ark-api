@@ -11,12 +11,13 @@ import (
 	"github.com/saint-rivers/saint-ark/router"
 )
 
-// @title Fiber Example API
+// @title Saint Ark: File Uploading
 // @version 1.0
-// @description This is a sample swagger for Fiber
+// @description This is an API for image management for your backend.
+// @description Made with Go, Fiber and MongoDB
 // @termsOfService http://swagger.io/terms/
 // @contact.name API Support
-// @contact.email fiber@swagger.io
+// @contact.email eam.dayan@gmail.com
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 // @host localhost:8080

@@ -15,10 +15,41 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func readGetQueries(ctx *fiber.Ctx) (string, string, string) {
-	format := ctx.Query("format")
+func readGetQueries(ctx *fiber.Ctx) (string, time.Time) {
+	desiredDateFormat := "2006-01-02"
 
-	return format, "", ""
+	format := ctx.Query("format")
+	dateString := ctx.Query("date")
+
+	date, err := time.Parse(desiredDateFormat, dateString)
+	if err != nil {
+		return format, time.Time{}
+	}
+	return format, date
+}
+
+func setMongoFilters(format string, date time.Time) primitive.D {
+	filterFields := bson.A{}
+	dateStart := date
+	dateEnd := date.Add(time.Hour*time.Duration(23) +
+		time.Minute*time.Duration(59) +
+		time.Second*time.Duration(59))
+
+	dateFilter := bson.D{
+		{Key: "$gte", Value: dateStart},
+		{Key: "$lt", Value: dateEnd},
+	}
+
+	if format != "" {
+		filterFields = append(filterFields, bson.M{"format": format})
+	}
+	if !date.IsZero() {
+		filterFields = append(filterFields, bson.M{"uploaddate": dateFilter})
+	}
+
+	filter := bson.D{{Key: "$and", Value: filterFields}}
+
+	return filter
 }
 
 // HealthCheck godoc
@@ -26,22 +57,18 @@ func readGetQueries(ctx *fiber.Ctx) (string, string, string) {
 // @Tags image-handler
 // @Accept */*
 // @Param format query string false "specify file format"
+// @Param date query string false "date" default(0000-00-00)
 // @Produce json
 // @Success 200 {object} map[string]interface{}
 // @Router /api/v1/images [get]
 func GetListedImages(ctx *fiber.Ctx, client *mongo.Client) error {
-	imageCollection := getResourceCollection(client)
-	var filter primitive.D
+	imageCollection := getImageCollection(client)
 
 	// use this function to get all queries from the context
-	format, _, _ := readGetQueries(ctx)
+	format, date := readGetQueries(ctx)
 
 	// setup filters based on queries
-	if format != "" {
-		filter = bson.D{{Key: "format", Value: format}}
-	} else {
-		filter = bson.D{{}}
-	}
+	filter := setMongoFilters(format, date)
 
 	// set mongo fetch options
 	findOptions := options.Find()
@@ -86,7 +113,7 @@ func GetListedImages(ctx *fiber.Ctx, client *mongo.Client) error {
 // @Success 200 {object} map[string]interface{}
 // @Router /api/v1/images [post]
 func InsertImage(ctx *fiber.Ctx, client *mongo.Client) error {
-	collection := getResourceCollection(client)
+	collection := getImageCollection(client)
 	_, fileName, originalFilename, err := utils.SaveFile(ctx)
 	if err != nil {
 		return ctx.Status(422).JSON(fiber.Map{"errors": [1]string{"We were not able upload your attachment"}})
@@ -107,6 +134,6 @@ func InsertImage(ctx *fiber.Ctx, client *mongo.Client) error {
 	})
 }
 
-func getResourceCollection(client *mongo.Client) *mongo.Collection {
+func getImageCollection(client *mongo.Client) *mongo.Collection {
 	return client.Database("saint-ark").Collection("resources")
 }

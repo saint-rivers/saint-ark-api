@@ -13,7 +13,7 @@ const docTemplate = `{
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
             "name": "API Support",
-            "email": "fiber@swagger.io"
+            "email": "eam.dayan@gmail.com"
         },
         "license": {
             "name": "Apache 2.0",
@@ -41,6 +41,13 @@ const docTemplate = `{
                         "type": "string",
                         "description": "specify file format",
                         "name": "format",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "0000-00-00",
+                        "description": "date",
+                        "name": "date",
                         "in": "query"
                     }
                 ],
@@ -94,8 +101,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8080",
 	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "Fiber Example API",
-	Description:      "This is a sample swagger for Fiber",
+	Title:            "Saint Ark: File Uploading",
+	Description:      "This is an API for image management for your backend.\nMade with Go, Fiber and MongoDB",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

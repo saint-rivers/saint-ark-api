@@ -1,12 +1,12 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is a sample swagger for Fiber",
-        "title": "Fiber Example API",
+        "description": "This is an API for image management for your backend.\nMade with Go, Fiber and MongoDB",
+        "title": "Saint Ark: File Uploading",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
             "name": "API Support",
-            "email": "fiber@swagger.io"
+            "email": "eam.dayan@gmail.com"
         },
         "license": {
             "name": "Apache 2.0",
@@ -34,6 +34,13 @@
                         "type": "string",
                         "description": "specify file format",
                         "name": "format",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "0000-00-00",
+                        "description": "date",
+                        "name": "date",
                         "in": "query"
                     }
                 ],

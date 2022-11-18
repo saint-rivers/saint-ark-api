@@ -2,14 +2,16 @@ basePath: /
 host: localhost:8080
 info:
   contact:
-    email: fiber@swagger.io
+    email: eam.dayan@gmail.com
     name: API Support
-  description: This is a sample swagger for Fiber
+  description: |-
+    This is an API for image management for your backend.
+    Made with Go, Fiber and MongoDB
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: http://swagger.io/terms/
-  title: Fiber Example API
+  title: 'Saint Ark: File Uploading'
   version: "1.0"
 paths:
   /api/v1/images:
@@ -20,6 +22,11 @@ paths:
       - description: specify file format
         in: query
         name: format
+        type: string
+      - default: 0000-00-00
+        description: date
+        in: query
+        name: date
         type: string
       produces:
       - application/json

@@ -5,7 +5,7 @@ import "time"
 type Resource struct {
 	Id         string    `json:"id"`
 	Name       string    `json:"name"`
-	UploadDate time.Time `json:"uploadDate"`
+	UploadDate time.Time `json:"uploadDate" example:"0000-00-00"`
 	Format     string    `json:"format"`
 }
 
