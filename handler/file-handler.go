@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"path/filepath"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -114,12 +115,12 @@ func GetListedImages(ctx *fiber.Ctx, client *mongo.Client) error {
 // @Router /api/v1/images [post]
 func InsertImage(ctx *fiber.Ctx, client *mongo.Client) error {
 	collection := getImageCollection(client)
-	_, fileName, originalFilename, err := utils.SaveFile(ctx)
+	createdUrl, fileName, originalFilename, err := utils.SaveFile(ctx)
 	if err != nil {
 		return ctx.Status(422).JSON(fiber.Map{"errors": [1]string{"We were not able upload your attachment"}})
 	}
 
-	newImage := model.Resource{Id: fileName, Name: originalFilename, Format: "PNG", UploadDate: time.Now()}
+	newImage := model.Resource{Id: fileName, Name: originalFilename, Format: filepath.Ext(fileName), UploadDate: time.Now()}
 
 	insertResult, err := collection.InsertOne(context.TODO(), newImage)
 	if err != nil {
@@ -130,7 +131,11 @@ func InsertImage(ctx *fiber.Ctx, client *mongo.Client) error {
 
 	return ctx.JSON(fiber.Map{
 		"message": "successfully inserted data",
-		"payload": fileName,
+		"payload": map[string]string{
+			"url":       createdUrl,
+			"fileName":  fileName,
+			"timestamp": time.Now().String(),
+		},
 	})
 }
 
