@@ -15,30 +15,6 @@ info:
   version: "1.0"
 paths:
   /api/v1/images:
-    get:
-      consumes:
-      - '*/*'
-      parameters:
-      - description: specify file format
-        in: query
-        name: format
-        type: string
-      - default: 0000-00-00
-        description: date
-        in: query
-        name: date
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get all images from the server.
-      tags:
-      - image-handler
     post:
       consumes:
       - multipart/form-data
@@ -57,6 +33,61 @@ paths:
             additionalProperties: true
             type: object
       summary: Show the status of server.
+      tags:
+      - image-handler
+  /api/v1/images/date:
+    get:
+      consumes:
+      - '*/*'
+      parameters:
+      - description: specify file format
+        in: query
+        name: format
+        type: string
+      - description: date
+        in: query
+        name: start
+        type: string
+      - description: date
+        in: query
+        name: end
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all images from the server.
+      tags:
+      - image-handler
+  /api/v1/images/timestamp:
+    get:
+      consumes:
+      - '*/*'
+      parameters:
+      - description: specify file format
+        in: query
+        name: format
+        type: string
+      - description: date
+        enum:
+        - TODAY
+        - THIS_WEEK
+        in: query
+        name: enumstring
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all images from the server.
       tags:
       - image-handler
 swagger: "2.0"

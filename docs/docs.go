@@ -25,6 +25,38 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/api/v1/images": {
+            "post": {
+                "description": "get the status of server.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "image-handler"
+                ],
+                "summary": "Show the status of server.",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "single file upload",
+                        "name": "myFile",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/images/date": {
             "get": {
                 "consumes": [
                     "*/*"
@@ -45,9 +77,14 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "default": "0000-00-00",
                         "description": "date",
-                        "name": "date",
+                        "name": "start",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "date",
+                        "name": "end",
                         "in": "query"
                     }
                 ],
@@ -60,11 +97,12 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "post": {
-                "description": "get the status of server.",
+            }
+        },
+        "/api/v1/images/timestamp": {
+            "get": {
                 "consumes": [
-                    "multipart/form-data"
+                    "*/*"
                 ],
                 "produces": [
                     "application/json"
@@ -72,13 +110,23 @@ const docTemplate = `{
                 "tags": [
                     "image-handler"
                 ],
-                "summary": "Show the status of server.",
+                "summary": "Get all images from the server.",
                 "parameters": [
                     {
-                        "type": "file",
-                        "description": "single file upload",
-                        "name": "myFile",
-                        "in": "formData"
+                        "type": "string",
+                        "description": "specify file format",
+                        "name": "format",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "TODAY",
+                            "THIS_WEEK"
+                        ],
+                        "type": "string",
+                        "description": "date",
+                        "name": "enumstring",
+                        "in": "query"
                     }
                 ],
                 "responses": {

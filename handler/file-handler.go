@@ -11,61 +11,34 @@ import (
 	"github.com/gofiber/fiber/v2"
 	model "github.com/saint-rivers/saint-ark/models"
 	"github.com/saint-rivers/saint-ark/utils"
+	"github.com/saint-rivers/saint-ark/utils/dates"
+	"github.com/saint-rivers/saint-ark/utils/queries"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func readGetQueries(ctx *fiber.Ctx) (string, time.Time) {
-	desiredDateFormat := "2006-01-02"
-
-	format := ctx.Query("format")
-	dateString := ctx.Query("date")
-
-	date, err := time.Parse(desiredDateFormat, dateString)
-	if err != nil {
-		return format, time.Time{}
-	}
-	return strings.ToLower(format), date
-}
-
-func setMongoFilters(format string, date time.Time) primitive.D {
-	// dateFilter := bson.D{}
+func setMongoFilters(format string, start time.Time, end time.Time) primitive.D {
 	filterFields := bson.A{}
 
-	var dateStart time.Time
-	var dateEnd time.Time
+	dateStart, dateEnd := dates.Between(start, end)
+	fmt.Println(dateStart, dateEnd)
 
-	if !date.IsZero() {
-		dateStart = date
-		dateEnd = date.Add(time.Hour*time.Duration(23) +
-			time.Minute*time.Duration(59) +
-			time.Second*time.Duration(59))
-	} else {
-		year, month, day := time.Now().Date()
-		dateStart = time.Date(year, month, day, 0, 0, 0, 0, time.Now().Location())
-
-		dateEnd = dateStart.Add(time.Hour*time.Duration(23) +
-			time.Minute*time.Duration(59) +
-			time.Second*time.Duration(59))
+	dateFilter := bson.D{
+		{Key: "$gte", Value: dateStart},
+		{Key: "$lt", Value: dateEnd},
 	}
 
 	if format != "" {
 		filterFields = append(filterFields, bson.M{"format": format})
 	}
-
-	// set date filter
-	dateFilter := bson.D{
-		{Key: "$gte", Value: dateStart},
-		{Key: "$lt", Value: dateEnd},
+	if !dateStart.IsZero() && !dateEnd.IsZero() {
+		filterFields = append(filterFields, bson.M{"uploaddate": dateFilter})
 	}
-	filterFields = append(filterFields, bson.M{"uploaddate": dateFilter})
 
-	filter := bson.D{{Key: "$and", Value: filterFields}}
-
-	fmt.Println("filter", filter)
-	return filter
+	// return date filter
+	return bson.D{{Key: "$and", Value: filterFields}}
 }
 
 // HealthCheck godoc
@@ -73,18 +46,70 @@ func setMongoFilters(format string, date time.Time) primitive.D {
 // @Tags image-handler
 // @Accept */*
 // @Param format query string false "specify file format"
-// @Param date query string false "date"
+// @Param enumstring query string false "date" Enums(TODAY, THIS_WEEK)
 // @Produce json
 // @Success 200 {object} map[string]interface{}
-// @Router /api/v1/images [get]
+// @Router /api/v1/images/timestamp [get]
 func GetListedImages(ctx *fiber.Ctx, client *mongo.Client) error {
 	imageCollection := getImageCollection(client)
 
 	// use this function to get all queries from the context
-	format, date := readGetQueries(ctx)
+	format, _ := queries.ReadGetQueries(ctx)
 
 	// setup filters based on queries
-	filter := setMongoFilters(format, date)
+	filter := bson.D{{Key: "format", Value: format}}
+
+	// set mongo fetch options
+	findOptions := options.Find()
+	findOptions.SetLimit(10)
+
+	// fetch data
+	current, err := imageCollection.Find(context.TODO(), filter, findOptions)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// read dataset results
+	var results []*model.Resource
+	for current.Next(context.TODO()) {
+		var resource model.Resource
+		err := current.Decode(&resource)
+		if err != nil {
+			log.Fatal(err)
+		}
+		results = append(results, &resource)
+	}
+	if err := current.Err(); err != nil {
+		log.Fatal(err)
+	}
+	current.Close(context.TODO())
+
+	// respond to user request
+	fmt.Printf("Found multiple documents (array of pointers): %+v\n", results)
+	return ctx.JSON(fiber.Map{
+		"message": "fetched data",
+		"payload": results,
+	})
+}
+
+// HealthCheck godoc
+// @Summary Get all images from the server.
+// @Tags image-handler
+// @Accept */*
+// @Param format query string false "specify file format"
+// @Param start query string false "date"
+// @Param end query string false "date"
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Router /api/v1/images/date [get]
+func FilterImagesByDate(ctx *fiber.Ctx, client *mongo.Client) error {
+	imageCollection := getImageCollection(client)
+
+	// use this function to get all queries from the context
+	format, startDate, endDate := queries.ReadDateFilterQueries(ctx)
+
+	// setup filters based on queries
+	filter := setMongoFilters(format, startDate, endDate)
 
 	// set mongo fetch options
 	findOptions := options.Find()

@@ -8,7 +8,11 @@ import (
 
 func ApplyFileRouter(app *fiber.App, client *mongo.Client) *fiber.App {
 
-	app.Get("/api/v1/images", func(c *fiber.Ctx) error {
+	app.Get("/api/v1/images/timestamp", func(c *fiber.Ctx) error {
+		return handler.GetListedImages(c, client)
+	})
+
+	app.Get("/api/v1/images/date", func(c *fiber.Ctx) error {
 		return handler.GetListedImages(c, client)
 	})
 
