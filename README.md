@@ -1,6 +1,6 @@
 # Saint Ark
 
-### References
+## References
 
 <https://github.com/gofiber/swagger>
 
