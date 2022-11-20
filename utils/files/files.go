@@ -1,10 +1,11 @@
-package utils
+package files
 
 import (
 	"fmt"
 	"path/filepath"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/saint-rivers/saint-ark/utils/rand"
 )
 
 func SaveFile(ctx *fiber.Ctx) (string, string, string, error) {
@@ -26,5 +27,5 @@ func SaveFile(ctx *fiber.Ctx) (string, string, string, error) {
 
 func rename(name string) string {
 	ext := filepath.Ext(name)
-	return "upload-" + GenerateAlphanumericString(24) + ext
+	return "upload-" + rand.GenerateAlphanumericString(24) + ext
 }

@@ -10,8 +10,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	model "github.com/saint-rivers/saint-ark/models"
-	"github.com/saint-rivers/saint-ark/utils"
 	"github.com/saint-rivers/saint-ark/utils/dates"
+	"github.com/saint-rivers/saint-ark/utils/files"
 	"github.com/saint-rivers/saint-ark/utils/queries"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -155,7 +155,7 @@ func FilterImagesByDate(ctx *fiber.Ctx, client *mongo.Client) error {
 // @Router /api/v1/images [post]
 func InsertImage(ctx *fiber.Ctx, client *mongo.Client) error {
 	collection := getImageCollection(client)
-	createdUrl, fileName, originalFilename, err := utils.SaveFile(ctx)
+	createdUrl, fileName, originalFilename, err := files.SaveFile(ctx)
 	if err != nil {
 		return ctx.Status(422).JSON(fiber.Map{"errors": [1]string{"We were not able upload your attachment"}})
 	}
