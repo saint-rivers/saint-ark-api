@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -26,30 +27,44 @@ func readGetQueries(ctx *fiber.Ctx) (string, time.Time) {
 	if err != nil {
 		return format, time.Time{}
 	}
-	return format, date
+	return strings.ToLower(format), date
 }
 
 func setMongoFilters(format string, date time.Time) primitive.D {
+	// dateFilter := bson.D{}
 	filterFields := bson.A{}
-	dateStart := date
-	dateEnd := date.Add(time.Hour*time.Duration(23) +
-		time.Minute*time.Duration(59) +
-		time.Second*time.Duration(59))
 
-	dateFilter := bson.D{
-		{Key: "$gte", Value: dateStart},
-		{Key: "$lt", Value: dateEnd},
+	var dateStart time.Time
+	var dateEnd time.Time
+
+	if !date.IsZero() {
+		dateStart = date
+		dateEnd = date.Add(time.Hour*time.Duration(23) +
+			time.Minute*time.Duration(59) +
+			time.Second*time.Duration(59))
+	} else {
+		year, month, day := time.Now().Date()
+		dateStart = time.Date(year, month, day, 0, 0, 0, 0, time.Now().Location())
+
+		dateEnd = dateStart.Add(time.Hour*time.Duration(23) +
+			time.Minute*time.Duration(59) +
+			time.Second*time.Duration(59))
 	}
 
 	if format != "" {
 		filterFields = append(filterFields, bson.M{"format": format})
 	}
-	if !date.IsZero() {
-		filterFields = append(filterFields, bson.M{"uploaddate": dateFilter})
+
+	// set date filter
+	dateFilter := bson.D{
+		{Key: "$gte", Value: dateStart},
+		{Key: "$lt", Value: dateEnd},
 	}
+	filterFields = append(filterFields, bson.M{"uploaddate": dateFilter})
 
 	filter := bson.D{{Key: "$and", Value: filterFields}}
 
+	fmt.Println("filter", filter)
 	return filter
 }
 
@@ -58,7 +73,7 @@ func setMongoFilters(format string, date time.Time) primitive.D {
 // @Tags image-handler
 // @Accept */*
 // @Param format query string false "specify file format"
-// @Param date query string false "date" default(0000-00-00)
+// @Param date query string false "date"
 // @Produce json
 // @Success 200 {object} map[string]interface{}
 // @Router /api/v1/images [get]
@@ -120,8 +135,13 @@ func InsertImage(ctx *fiber.Ctx, client *mongo.Client) error {
 		return ctx.Status(422).JSON(fiber.Map{"errors": [1]string{"We were not able upload your attachment"}})
 	}
 
-	newImage := model.Resource{Id: fileName, Name: originalFilename, Format: filepath.Ext(fileName), UploadDate: time.Now()}
+	// get file format
+	ext := filepath.Ext(fileName)[1:]
 
+	// create object
+	newImage := model.Resource{Id: fileName, Name: originalFilename, Format: strings.ToLower(ext), UploadDate: time.Now()}
+
+	// insert
 	insertResult, err := collection.InsertOne(context.TODO(), newImage)
 	if err != nil {
 		log.Fatal(err)
