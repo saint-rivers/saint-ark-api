@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/saint-rivers/saint-ark/models/timeframe"
 )
 
 func ReadDateFilterQueries(ctx *fiber.Ctx) (string, time.Time, time.Time) {
@@ -35,7 +36,11 @@ func ReadDateFilterQueries(ctx *fiber.Ctx) (string, time.Time, time.Time) {
 func ReadGetQueries(ctx *fiber.Ctx) (string, string) {
 
 	format := ctx.Query("format")
-	timestamp := ctx.Query("timestamp")
+	timestamp := ctx.Query("time")
+
+	if !timeframe.Valid(timestamp) {
+		log.Fatal("invalid time frame")
+	}
 
 	return strings.ToLower(format), timestamp
 }

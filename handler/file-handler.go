@@ -10,6 +10,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	model "github.com/saint-rivers/saint-ark/models"
+	"github.com/saint-rivers/saint-ark/models/timeframe"
 	"github.com/saint-rivers/saint-ark/utils/dates"
 	"github.com/saint-rivers/saint-ark/utils/files"
 	"github.com/saint-rivers/saint-ark/utils/queries"
@@ -46,22 +47,31 @@ func setMongoFilters(format string, start time.Time, end time.Time) primitive.D 
 // @Tags image-handler
 // @Accept */*
 // @Param format query string false "specify file format"
-// @Param enumstring query string false "date" Enums(TODAY, THIS_WEEK)
+// @Param time query string false "date" Enums(today, this_week, this_month)
 // @Produce json
 // @Success 200 {object} map[string]interface{}
 // @Router /api/v1/images/timestamp [get]
 func GetListedImages(ctx *fiber.Ctx, client *mongo.Client) error {
+	var startDate, endDate time.Time
 	imageCollection := getImageCollection(client)
 
 	// use this function to get all queries from the context
-	format, _ := queries.ReadGetQueries(ctx)
+	format, timeFrame := queries.ReadGetQueries(ctx)
+	switch timeFrame {
+	case timeframe.Today.String():
+		startDate, endDate = dates.Of(time.Now())
+	case timeframe.ThisWeek.String():
+		startDate, endDate = dates.LastWeek()
+	case timeframe.ThisMonth.String():
+		startDate, endDate = dates.LastMonth()
+	}
 
 	// setup filters based on queries
-	filter := bson.D{{Key: "format", Value: format}}
+	filter := setMongoFilters(format, startDate, endDate)
 
 	// set mongo fetch options
 	findOptions := options.Find()
-	findOptions.SetLimit(10)
+	// findOptions.SetLimit(10)
 
 	// fetch data
 	current, err := imageCollection.Find(context.TODO(), filter, findOptions)
@@ -85,9 +95,10 @@ func GetListedImages(ctx *fiber.Ctx, client *mongo.Client) error {
 	current.Close(context.TODO())
 
 	// respond to user request
-	fmt.Printf("Found multiple documents (array of pointers): %+v\n", results)
+	// fmt.Printf("Found multiple documents (array of pointers): %+v\n", results)
 	return ctx.JSON(fiber.Map{
 		"message": "fetched data",
+		"count":   len(results),
 		"payload": results,
 	})
 }
@@ -137,9 +148,10 @@ func FilterImagesByDate(ctx *fiber.Ctx, client *mongo.Client) error {
 	current.Close(context.TODO())
 
 	// respond to user request
-	fmt.Printf("Found multiple documents (array of pointers): %+v\n", results)
+	// fmt.Printf("Found multiple documents (array of pointers): %+v\n", results)
 	return ctx.JSON(fiber.Map{
 		"message": "fetched data",
+		"count":   len(results),
 		"payload": results,
 	})
 }

@@ -26,6 +26,19 @@ func LastWeek() (time.Time, time.Time) {
 	return dateStart, dateEnd
 }
 
+func LastMonth() (time.Time, time.Time) {
+	now := time.Now()
+	year, month, day := now.Date()
+
+	dateStart := time.Date(year, month, day, 0, 0, 0, 0, now.Location()).AddDate(0, 0, -30)
+
+	dateEnd := now.Add(time.Hour*time.Duration(23) +
+		time.Minute*time.Duration(59) +
+		time.Second*time.Duration(59))
+
+	return dateStart, dateEnd
+}
+
 func Of(date time.Time) (time.Time, time.Time) {
 	dateStart := date
 	dateEnd := date.Add(time.Hour*time.Duration(23) +

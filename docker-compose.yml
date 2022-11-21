@@ -2,6 +2,15 @@ version: '3.3'
 
 services:
 
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    restart: on-failure
+    container_name: saint-ark-api
+
   mongo:
     image: mongo
     container_name: saint-ark-db

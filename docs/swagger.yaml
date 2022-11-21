@@ -74,10 +74,11 @@ paths:
         type: string
       - description: date
         enum:
-        - TODAY
-        - THIS_WEEK
+        - today
+        - this_week
+        - this_month
         in: query
-        name: enumstring
+        name: time
         type: string
       produces:
       - application/json

@@ -120,12 +120,13 @@ const docTemplate = `{
                     },
                     {
                         "enum": [
-                            "TODAY",
-                            "THIS_WEEK"
+                            "today",
+                            "this_week",
+                            "this_month"
                         ],
                         "type": "string",
                         "description": "date",
-                        "name": "enumstring",
+                        "name": "time",
                         "in": "query"
                     }
                 ],
